@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load urlify %}
+
+{% block head_title %}
+	{{ instance.title }} | {{ block.super }} 
+{% endblock head_title %}
+
+{% block header %}
+<!-- Page Header -->
+<header class="masthead" style="background-image: url('{% if instance.image %}{{ instance.image.url }}{% else %}{% static "img/home-bg.jpg" %}{% endif %}')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <div class="post-heading">
+			<h1>{{ title }}</h1>
+			<h2 class="subheading">
+				{% if instance.draft %}<span class="badge badge-danger"><small>Draft </small></span>{% endif %} {% if instance.publish > today %}<span class="badge badge-danger"><small> Future Post</small></span>{% endif %}
+
+				{% for instance in instance.tags.all %}
+				<span class="badge badge-primary"><small>{{ instance.slug }}</small></span>
+				{% endfor %}
+			</h2>
+			<span class="meta">Posted by
+			{% if instance.user.get_full_name %}
+			{{ instance.user.get_full_name }}
+			{% else %}
+			{{ instance.user }}
+			{% endif %}
+			on {{ instance.publish }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+{% endblock header %}
+
+{% block content %}
+<!-- Detail Content -->
+<article>
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<p>{{ instance.content }}</p>
+
+				<!-- Pager -->
+			<div class="clearfix">
+				{% if request.user.is_staff or request.user.is_superuser %}
+				<a class="btn btn-primary float-left" href='{{ instance.get_absolute_url }}edit'>Edit Post</a>
+				<a class="btn btn-danger float-right" href='{{ instance.get_absolute_url }}delete'>Delete Posts</a>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+</article>
+{% endblock content%}
+
+{% block footer %}
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          <li class="list-inline-item">
+            <a href="https://twitter.com/home?status={{ title|truncatechars:80|urlify }}%20{{ request.build_absolute_uri }}">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a href="https://plus.google.com/share?url={{ request.build_absolute_uri }}">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-google fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+        </ul>
+        <p class="copyright text-muted">Copyright &copy; Your Website 2018</p>
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock footer %}
+
+				

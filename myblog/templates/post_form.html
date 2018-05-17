@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load bootstrap %}
+{% load urlify %}
+
+{% block header %}
+<!-- Page Header -->
+<header class="masthead" style="background-image: url('{% static "img/home-bg.jpg" %}')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <div class="site-heading">
+          <h1>Clean Blog</h1>
+          <span class="subheading">A Blog Theme by Start Bootstrap</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+{% endblock header %}
+
+{% block content %}
+<!-- Form Content -->
+<form class="form-horizontal" method='POST' action='' enctype='multipart/form-data'>{% csrf_token %}
+	<legend>Blog Form</legend>
+	{{ form|bootstrap_horizontal }}
+	<div class="form-group">
+		<div class="col-sm-10 col-sm-offset-2">
+			<input type="submit" class="btn btn-primary" value='Create Post' />
+		</div>
+	</div>
+</form>
+{% endblock content %}
+
+{% block footer %}
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          <li class="list-inline-item">
+            <a href="https://twitter.com/home?status={{ 'Sample Blog'|truncatechars:80|urlify }}%20{{ request.build_absolute_uri }}">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a href="https://plus.google.com/share?url={{ request.build_absolute_uri }}">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-google fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+        </ul>
+        <p class="copyright text-muted">Copyright &copy; Your Website 2018</p>
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock footer %}

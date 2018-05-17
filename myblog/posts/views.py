@@ -1,0 +1,111 @@
+from urllib.parse import quote
+
+from django.contrib import messages
+from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import Q
+from django.shortcuts import render
+from django.utils import timezone
+
+from .models import Post
+from .models import Tag
+from .forms import PostForm
+
+# Create your views here.
+def post_create(request):
+	if request.user.is_staff or request.user.is_superuser:
+		form = PostForm(request.POST or None, request.FILES or None)
+		if form.is_valid():
+			instance = form.save(commit=False)
+			instance.user = request.user
+			instance.save()
+			form.save_m2m()
+			# messages.success(request, "Successfully Created")
+			return HttpResponseRedirect(instance.get_absolute_url())
+	else:
+		raise Http404
+	context = {
+		"form": form,
+	}
+	return render(request,'post_form.html', context)
+
+def post_detail(request, slug=None):
+	today = timezone.now().date()
+	instance = get_object_or_404(Post, slug=slug)
+	if instance.draft or instance.publish > today:
+		if not request.user.is_staff:
+			raise Http404
+		if not request.user.is_superuser:
+			raise Http404
+	share_string = quote(instance.content)
+	context = {
+		"title": instance.title,
+		"instance": instance,
+		"share_string": share_string,
+		"today": today,
+	}
+	return render(request,'post_detail.html', context)
+
+def post_list(request):
+	today = timezone.now().date()
+	queryset_list = Post.objects.active()
+	if request.user.is_staff or request.user.is_superuser:
+		queryset_list = Post.objects.all()
+
+	query = request.GET.get("q")
+	if query:
+		queryset_list = queryset_list.filter(
+			Q(title__icontains=query) |
+			Q(content__icontains=query) |
+			Q(user__username__icontains=query) |
+			Q(user__first_name__icontains=query) |
+			Q(user__last_name__icontains=query)
+			).distinct()
+	paginator = Paginator(queryset_list, 3)
+	page_request_var = 'page'
+	page = request.GET.get(page_request_var)
+	try:
+		queryset = paginator.page(page)
+	except PageNotAnInteger:
+		queryset = paginator.page(1)
+	except EmptyPage:
+		queryset = paginator.page(paginator.num_pages)
+
+	context = {
+		"object_list": queryset,
+		"page_request_var": page_request_var,
+		"today": today,
+	}
+	return render(request,'post_list.html', context)
+
+def post_update(request, slug=None):
+	if request.user.is_staff or request.user.is_superuser:
+		instance = get_object_or_404(Post, slug=slug)
+		form = PostForm(request.POST or None, request.FILES or None, instance=instance)
+		if form.is_valid():
+			instance = form.save(commit=False)
+			instance.save()
+			form.save_m2m()
+			# messages.success(request, "<a href='#'>Updated Successfully</a>", extra_tags='html_safe')
+			return HttpResponseRedirect(instance.get_absolute_url())
+	else:
+		raise Http404
+	context = {
+		"title": instance.title,
+		"instance": instance,
+		"form": form,
+	}
+	return render(request,'post_form.html', context)
+
+def post_delete(request, slug=None):
+	if request.user.is_staff or request.user.is_superuser:
+		instance = get_object_or_404(Post, slug=slug)
+		instance.delete()
+		# messages.success(request, "Successfully Deleted")
+	else:
+		raise Http404
+	return redirect("posts:list")
+
+def post_about(request):
+	return render(request, 'post_about.html')

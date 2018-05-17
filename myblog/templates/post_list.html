@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load urlify %}
+
+{% block header %}
+<!-- Page Header -->
+<header class="masthead" style="background-image: url('{% static "img/home-bg.jpg" %}')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <div class="site-heading">
+          <h1>Clean Blog</h1>
+          <span class="subheading">Simplicity is beauty</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+{% endblock header %}
+
+<!-- List Content -->
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 col-md-10 mx-auto">
+        <form method='GET' action=''>
+            <input type='text' name='q' placeholder="Search posts" value='{{ request.GET.q  }}'/>
+            <input type='submit' value='Search' />
+        </form>
+        <div class="post-preview">
+            {% for object in object_list %}
+                <a href="{{ object.get_absolute_url }}">
+                    <h2 class="post-title">
+                    {{ object.title }}
+                    </h2>
+                    <h3 class="post-subtitle">
+                   {{ object.content|truncatechars:120 }}
+                    </h3>
+                </a>
+
+                {% if object.draft %}<span class="badge badge-danger">Draft</span>{% endif %} {% if object.publish > today %}<span class="badge badge-danger"> Future Post</span>{% endif %}
+                {% for tag in object.tags.all %}
+                <span class="badge badge-primary">{{ tag.slug }}</span>
+                {% endfor %}
+                <p class="post-meta">
+                Posted by
+                {% if object.user.get_full_name %}
+                {{ object.user.get_full_name }}
+                {% else %}
+                {{ object.user }}
+                {% endif %}
+                on {{ object.publish }}</p>
+            {% endfor %}
+        </div>
+        <hr>
+        <!-- Pager -->
+        <div class="clearfix">
+            {% if object_list.has_previous %}
+            <a class="btn btn-primary float-left" href="?{{ page_request_var }}={{ object_list.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">&larr; Newer Posts</a>
+            {% endif %}
+
+            {% if object_list.has_next %}
+            <a class="btn btn-primary float-right" href="?{{ page_request_var }}={{ object_list.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Older Posts &rarr;</a>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block footer %}
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          <li class="list-inline-item">
+            <a href="https://twitter.com/home?status={{ 'Sample Blog'|truncatechars:80|urlify }}%20{{ request.build_absolute_uri }}">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          <li class="list-inline-item">
+            <a href="https://plus.google.com/share?url={{ request.build_absolute_uri }}">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-google fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+        </ul>
+        <p class="copyright text-muted">Copyright &copy; Your Website 2018</p>
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock footer %}
